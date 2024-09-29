@@ -157,7 +157,7 @@ labels_dbscan = dbscan.labels_
 plt.figure(figsize=(10, 6))
 scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=labels_dbscan, cmap='viridis')
 # plt.colorbar(scatter)
-plt.title("DBSCAN clustering (Principal Component 1 vs principal Component 2)")
+plt.title("DBSCAN Clustering (Principal Component 1 vs principal Component 2)")
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
 plt.show()
@@ -180,6 +180,9 @@ plt.ylabel('Principal Component 2')
 plt.show()
 
 ########## 4.1 Silhouette Score ################
+
+def euclidean_distance(point1, point2):
+    return np.sqrt(np.sum((point1 - point2) ** 2))
 
 # def silhouette_score(points, labels):
 #     n = len(points)
@@ -220,6 +223,7 @@ plt.show()
 #     return overall_silhouette_score
 
 # print(f"Silhouette Score for DBSCAN: {silhouette_score(X.values, labels_dbscan)}")
+# print(f"Silhouette Score for BIRCH: {silhouette_score(X.values, labels_birch)}")
 
 #########  4.2 Davies Bouldin Score    ##################
 def evaluate_davies_bouldin(X, labels_dbscan, labels_birch):
@@ -227,7 +231,7 @@ def evaluate_davies_bouldin(X, labels_dbscan, labels_birch):
     score_birch = davies_bouldin_score(X, labels_birch)
 
     print(f"Davies-Bouldin Score for DBSCAN: {score_dbscan}")
-    print(f"Davies-Bouldin Score for Birch: {score_birch}")
+    print(f"Davies-Bouldin Score for BIRCH: {score_birch}")
     return [score_dbscan, score_birch]
 
 X = pca_df[['Principal Component 1', 'Principal Component 2']]
@@ -241,7 +245,7 @@ def evaluate_calinski_harabasz(X, labels_dbscan, labels_birch):
     score_birch = calinski_harabasz_score(X, labels_birch)
 
     print(f"Calinski-Harabasz Score for DBSCAN: {score_dbscan}")
-    print(f"Calinski-Harabasz Score for Birch: {score_birch}")
+    print(f"Calinski-Harabasz Score for BIRCH: {score_birch}")
     return [score_dbscan, score_birch]
 
 ## change the X to the clustering variable
@@ -250,66 +254,63 @@ evaluate_calinski_harabasz(X, labels_dbscan, labels_birch)
 
 ########       Comparison Chart For Evaluation  ########
 
-silhouette_metrics = ['Silhouette Score']
-db_metrics = ['Davies-Bouldin Score']
-ch_metrics = ['Calinski Harabasz Index']
-scores = [
-    [silhouette_score(X.values, labels_dbscan), silhouette_score(X.values, labels_birch)],
-    [(evaluate_davies_bouldin(X, labels_dbscan, labels_birch))],
-    [(evaluate_calinski_harabasz(X, labels_dbscan, labels_birch))]
-]
+# silhouette_metrics = ['Silhouette Score']
+# db_metrics = ['Davies-Bouldin Score']
+# ch_metrics = ['Calinski Harabasz Index']
+# scores = [
+#     [silhouette_score(X.values, labels_dbscan), silhouette_score(X.values, labels_birch)],
+#     [(evaluate_davies_bouldin(X, labels_dbscan, labels_birch))],
+#     [(evaluate_calinski_harabasz(X, labels_dbscan, labels_birch))]
+# ]
 
-evaluation_fig_silhouette = go.Figure(data=[
-    go.Bar(name='DBSCAN', x=silhouette_metrics, y=[scores[0][0]]),
-    go.Bar(name='BIRCH', x=silhouette_metrics, y=[scores[0][1]])
-])
+# evaluation_fig_silhouette = go.Figure(data=[
+#     go.Bar(name='DBSCAN', x=silhouette_metrics, y=[scores[0][0]]),
+#     go.Bar(name='BIRCH', x=silhouette_metrics, y=[scores[0][1]])
+# ])
 
-evaluation_fig_silhouette.update_layout(
-    title='Comparison of Clustering Performance Metrics',
-    xaxis_title='Clustering Metrics',
-    yaxis_title='Score',
-    barmode='group' 
-)
+# evaluation_fig_silhouette.update_layout(
+#     title='Comparison of Clustering Performance Metrics',
+#     xaxis_title='Clustering Metrics',
+#     yaxis_title='Score',
+#     barmode='group' 
+# )
 
-evaluation_fig_silhouette.show()
+# evaluation_fig_silhouette.show()
 
-evaluation_fig_db = go.Figure(data=[
-    go.Bar(name='DBSCAN', x=db_metrics, y=[scores[1][0][0]]),
-    go.Bar(name='BIRCH', x=db_metrics, y=[scores[1][0][1]])
-])
+# evaluation_fig_db = go.Figure(data=[
+#     go.Bar(name='DBSCAN', x=db_metrics, y=[scores[1][0][0]]),
+#     go.Bar(name='BIRCH', x=db_metrics, y=[scores[1][0][1]])
+# ])
 
-evaluation_fig_db.update_layout(
-    title='Comparison of Clustering Performance Metrics',
-    xaxis_title='Clustering Metrics',
-    yaxis_title='Score',
-    barmode='group'
-)
+# evaluation_fig_db.update_layout(
+#     title='Comparison of Clustering Performance Metrics',
+#     xaxis_title='Clustering Metrics',
+#     yaxis_title='Score',
+#     barmode='group'
+# )
 
-evaluation_fig_db.show()
+# evaluation_fig_db.show()
 
-evaluation_fig_ch = go.Figure(data=[
-    go.Bar(name='DBSCAN', x=ch_metrics, y=[scores[2][0][0]]),
-    go.Bar(name='BIRCH', x=ch_metrics, y=[scores[2][0][1]])
-])
+# evaluation_fig_ch = go.Figure(data=[
+#     go.Bar(name='DBSCAN', x=ch_metrics, y=[scores[2][0][0]]),
+#     go.Bar(name='BIRCH', x=ch_metrics, y=[scores[2][0][1]])
+# ])
 
-evaluation_fig_ch.update_layout(
-    title='Comparison of Clustering Performance Metrics',
-    xaxis_title='Clustering Metrics',
-    yaxis_title='Score',
-    barmode='group' 
-)
+# evaluation_fig_ch.update_layout(
+#     title='Comparison of Clustering Performance Metrics',
+#     xaxis_title='Clustering Metrics',
+#     yaxis_title='Score',
+#     barmode='group' 
+# )
 
-evaluation_fig_ch.show()
+# evaluation_fig_ch.show()
 
 ########### 5.1 Eucledian Distance  ##############
-
-def euclidean_distance(point1, point2):
-    return np.sqrt(np.sum((point1 - point2) ** 2))
 
 X = pca_df[['Principal Component 1', 'Principal Component 2']]
 # euclidean_X = cdist (X, X, metric=euclidean_distance)
 
-dbscan = DBSCAN(eps=0.4, min_samples=2, metric=euclidean_distance).fit(X)
+dbscan = DBSCAN(eps=0.01, min_samples=2, metric=euclidean_distance).fit(X)
 # Labels
 euclidean_labels_dbscan = dbscan.labels_
 
@@ -332,7 +333,7 @@ def manhattan_distance(point1, point2):
 
 X = pca_df[['Principal Component 1', 'Principal Component 2']]
 
-dbscan = DBSCAN(eps=0.4, min_samples=2, metric=manhattan_distance).fit(X)
+dbscan = DBSCAN(eps=0.01, min_samples=2, metric=manhattan_distance).fit(X)
 # Labels
 manhattan_labels_dbscan = dbscan.labels_
 
@@ -357,7 +358,7 @@ def cosine_similarity_distance(point1, point2):
 
 X = pca_df[['Principal Component 1', 'Principal Component 2']]
 
-dbscan = DBSCAN(eps=0.4, min_samples=2, metric=cosine_similarity_distance).fit(X)
+dbscan = DBSCAN(eps=0.01, min_samples=2, metric=cosine_similarity_distance).fit(X)
 # Labels
 cosine_labels_dbscan = dbscan.labels_
 
@@ -374,5 +375,25 @@ plt.show()
 
 print(f"Davies-Bouldin Score for DBSCAN with Eucledian Distance: {davies_bouldin_score(X, euclidean_labels_dbscan)}")
 print(f"Davies-Bouldin Score for DBSCAN with Manhattan Distance: {davies_bouldin_score(X, manhattan_labels_dbscan)}")
-# print(f"Davies-Bouldin Score for DBSCAN with Cosine Distance: {davies_bouldin_score(X, cosine_labels_dbscan)}")
-# There is only one cluster, therefore we cannot calculate davies_bouldin_score for it
+print(f"Davies-Bouldin Score for DBSCAN with Cosine Distance: {davies_bouldin_score(X, cosine_labels_dbscan)}")
+
+distances = ['Eucledian', 'Manhattan', 'Cosine Similarity']
+db_values = [davies_bouldin_score(X, euclidean_labels_dbscan), davies_bouldin_score(X, manhattan_labels_dbscan), davies_bouldin_score(X, cosine_labels_dbscan)]
+
+distance_comparison_fig = go.Figure(data=[
+    go.Bar(
+        x=distances,
+        y=db_values,
+        text=[f"{db:.2f}" for db in db_values],  
+        textposition='auto' 
+    )
+])
+
+distance_comparison_fig.update_layout(
+    title='Comparison of Davies-Bouldin Scores for Different Distance Metrics',
+    xaxis_title='Distance Metric',
+    yaxis_title='Davies-Bouldin Score',
+    yaxis=dict(range=[0, max(db_values) * 1.1])  
+)
+
+distance_comparison_fig.show()
