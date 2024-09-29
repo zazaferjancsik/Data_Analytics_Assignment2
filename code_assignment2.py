@@ -184,46 +184,46 @@ plt.show()
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((point1 - point2) ** 2))
 
-# def silhouette_score(points, labels):
-#     n = len(points)
-#     unique_clusters = set(labels)
+def silhouette_score(points, labels):
+    n = len(points)
+    unique_clusters = set(labels)
     
-#     silhouette_scores = []
+    silhouette_scores = []
     
-#     for i in range(n):
-#         current_point = points[i]
-#         current_cluster = labels[i]
+    for i in range(n):
+        current_point = points[i]
+        current_cluster = labels[i]
         
-#         # Intra-cluster distance: average distance to all other points in the same cluster
-#         same_cluster_points = [points[j] for j in range(n) if labels[j] == current_cluster and j != i]
-#         if same_cluster_points:
-#             a_i = sum(euclidean_distance(current_point, p) for p in same_cluster_points) / len(same_cluster_points)
-#         else:
-#             a_i = 0  # When there's no other point in the same cluster
+        # Intra-cluster distance: average distance to all other points in the same cluster
+        same_cluster_points = [points[j] for j in range(n) if labels[j] == current_cluster and j != i]
+        if same_cluster_points:
+            a_i = sum(euclidean_distance(current_point, p) for p in same_cluster_points) / len(same_cluster_points)
+        else:
+            a_i = 0  # When there's no other point in the same cluster
         
-#         # Inter-cluster distance: minimum average distance to points in any other cluster
-#         b_i = float('inf')
-#         for other_cluster in unique_clusters:
-#             if other_cluster == current_cluster:
-#                 continue
-#             other_cluster_points = [points[j] for j in range(n) if labels[j] == other_cluster]
-#             if other_cluster_points:
-#                 avg_distance = sum(euclidean_distance(current_point, p) for p in other_cluster_points) / len(other_cluster_points)
-#                 b_i = min(b_i, avg_distance)
+        # Inter-cluster distance: minimum average distance to points in any other cluster
+        b_i = float('inf')
+        for other_cluster in unique_clusters:
+            if other_cluster == current_cluster:
+                continue
+            other_cluster_points = [points[j] for j in range(n) if labels[j] == other_cluster]
+            if other_cluster_points:
+                avg_distance = sum(euclidean_distance(current_point, p) for p in other_cluster_points) / len(other_cluster_points)
+                b_i = min(b_i, avg_distance)
         
-#         # Calculate silhouette score for point i
-#         if a_i == 0 and b_i == 0:
-#             silhouette = 0
-#         else:
-#             silhouette = (b_i - a_i) / max(a_i, b_i)
-#         silhouette_scores.append(silhouette)
+        # Calculate silhouette score for point i
+        if a_i == 0 and b_i == 0:
+            silhouette = 0
+        else:
+            silhouette = (b_i - a_i) / max(a_i, b_i)
+        silhouette_scores.append(silhouette)
     
-#     # Average silhouette score for all points
-#     overall_silhouette_score = sum(silhouette_scores) / n
-#     return overall_silhouette_score
+    # Average silhouette score for all points
+    overall_silhouette_score = sum(silhouette_scores) / n
+    return overall_silhouette_score
 
-# print(f"Silhouette Score for DBSCAN: {silhouette_score(X.values, labels_dbscan)}")
-# print(f"Silhouette Score for BIRCH: {silhouette_score(X.values, labels_birch)}")
+print(f"Silhouette Score for DBSCAN: {silhouette_score(X.values, labels_dbscan)}")
+print(f"Silhouette Score for BIRCH: {silhouette_score(X.values, labels_birch)}")
 
 #########  4.2 Davies Bouldin Score    ##################
 def evaluate_davies_bouldin(X, labels_dbscan, labels_birch):
@@ -254,56 +254,56 @@ evaluate_calinski_harabasz(X, labels_dbscan, labels_birch)
 
 ########       Comparison Chart For Evaluation  ########
 
-# silhouette_metrics = ['Silhouette Score']
-# db_metrics = ['Davies-Bouldin Score']
-# ch_metrics = ['Calinski Harabasz Index']
-# scores = [
-#     [silhouette_score(X.values, labels_dbscan), silhouette_score(X.values, labels_birch)],
-#     [(evaluate_davies_bouldin(X, labels_dbscan, labels_birch))],
-#     [(evaluate_calinski_harabasz(X, labels_dbscan, labels_birch))]
-# ]
+silhouette_metrics = ['Silhouette Score']
+db_metrics = ['Davies-Bouldin Score']
+ch_metrics = ['Calinski Harabasz Index']
+scores = [
+    [silhouette_score(X.values, labels_dbscan), silhouette_score(X.values, labels_birch)],
+    [(evaluate_davies_bouldin(X, labels_dbscan, labels_birch))],
+    [(evaluate_calinski_harabasz(X, labels_dbscan, labels_birch))]
+]
 
-# evaluation_fig_silhouette = go.Figure(data=[
-#     go.Bar(name='DBSCAN', x=silhouette_metrics, y=[scores[0][0]]),
-#     go.Bar(name='BIRCH', x=silhouette_metrics, y=[scores[0][1]])
-# ])
+evaluation_fig_silhouette = go.Figure(data=[
+    go.Bar(name='DBSCAN', x=silhouette_metrics, y=[scores[0][0][0]]),       ######
+    go.Bar(name='BIRCH', x=silhouette_metrics, y=[scores[0][0][1]])
+])
 
-# evaluation_fig_silhouette.update_layout(
-#     title='Comparison of Clustering Performance Metrics',
-#     xaxis_title='Clustering Metrics',
-#     yaxis_title='Score',
-#     barmode='group' 
-# )
+evaluation_fig_silhouette.update_layout(
+    title='Comparison of Clustering Performance Metrics',
+    xaxis_title='Silhouette Score',                                 #########
+    yaxis_title='Score',
+    barmode='group' 
+)
 
-# evaluation_fig_silhouette.show()
+evaluation_fig_silhouette.show()
 
-# evaluation_fig_db = go.Figure(data=[
-#     go.Bar(name='DBSCAN', x=db_metrics, y=[scores[1][0][0]]),
-#     go.Bar(name='BIRCH', x=db_metrics, y=[scores[1][0][1]])
-# ])
+evaluation_fig_db = go.Figure(data=[
+    go.Bar(name='DBSCAN', x=db_metrics, y=[scores[1][0][0]]),
+    go.Bar(name='BIRCH', x=db_metrics, y=[scores[1][0][1]])
+])
 
-# evaluation_fig_db.update_layout(
-#     title='Comparison of Clustering Performance Metrics',
-#     xaxis_title='Clustering Metrics',
-#     yaxis_title='Score',
-#     barmode='group'
-# )
+evaluation_fig_db.update_layout(
+    title='Comparison of Clustering Performance Metrics',
+    xaxis_title='Davies Bouldin Score',
+    yaxis_title='Score',
+    barmode='group'
+)
 
-# evaluation_fig_db.show()
+evaluation_fig_db.show()
 
-# evaluation_fig_ch = go.Figure(data=[
-#     go.Bar(name='DBSCAN', x=ch_metrics, y=[scores[2][0][0]]),
-#     go.Bar(name='BIRCH', x=ch_metrics, y=[scores[2][0][1]])
-# ])
+evaluation_fig_ch = go.Figure(data=[
+    go.Bar(name='DBSCAN', x=ch_metrics, y=[scores[2][0][0]]),
+    go.Bar(name='BIRCH', x=ch_metrics, y=[scores[2][0][1]])
+])
 
-# evaluation_fig_ch.update_layout(
-#     title='Comparison of Clustering Performance Metrics',
-#     xaxis_title='Clustering Metrics',
-#     yaxis_title='Score',
-#     barmode='group' 
-# )
+evaluation_fig_ch.update_layout(
+    title='Comparison of Clustering Performance Metrics',
+    xaxis_title='Calinski Harabasz Index',
+    yaxis_title='Score',
+    barmode='group' 
+)
 
-# evaluation_fig_ch.show()
+evaluation_fig_ch.show()
 
 ########### 5.1 Eucledian Distance  ##############
 
