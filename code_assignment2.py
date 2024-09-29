@@ -84,15 +84,14 @@ comparison_fig = px.bar(
     barmode="group",
 )
 
+
 comparison_fig.update_layout(
     xaxis=dict(tickfont=dict(family='Arial Black', size=14)),
     yaxis=dict(tickfont=dict(family='Arial Black', size=14))
-
 )
-
 comparison_fig.show()
 
-#Apply PCA on our data                                                          #Could take a look at SVD as well
+#Apply PCA on our data                                                          
 X = numerical_shoppers_data.drop(columns=['Revenue'])
 y = numerical_shoppers_data['Revenue']
 pca = PCA(n_components=2)
@@ -111,7 +110,6 @@ plt.xlabel('Principal Components')
 plt.ylabel('Explained Variance Ratio')
 plt.show()
 
-# c stand for color, since there are only two condition of Severity(y) so set two color to easier visualize
 colors = ['red' if label == 0 else 'purple' for label in y]
 plt.scatter(x=pca_df['Principal Component 1'], y=pca_df['Principal Component 2'],
             c=colors)
@@ -156,7 +154,7 @@ labels_dbscan = dbscan.labels_
 
 plt.figure(figsize=(10, 6))
 scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=labels_dbscan, cmap='viridis')
-plt.colorbar(scatter)
+# plt.colorbar(scatter)
 plt.title("DBSCAN clustering (Principal Component 1 vs principal Component 2)")
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
@@ -177,7 +175,7 @@ plt.colorbar(scatter)
 plt.title("BIRCH Clustering (Principal Component 1 vs Principal Componenet 2)")
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
-plt.show()
+# plt.show()
 
 ########## 4.1 Silhouette Score ################
 
@@ -251,9 +249,9 @@ evaluate_davies_bouldin(X, labels_dbscan, labels_birch)
 ########### 5.1 Eucledian Distance  ##############
 
 X = pca_df[['Principal Component 1', 'Principal Component 2']]
-euclidean_X = cdist (X, X, metric=euclidean_distance)
+# euclidean_X = cdist (X, X, metric=euclidean_distance)
 
-dbscan = DBSCAN(eps=0.4, min_samples=2, metric='precomputed').fit(euclidean_X)
+dbscan = DBSCAN(eps=0.4, min_samples=2, metric=euclidean_distance).fit(X)
 # Labels
 euclidean_labels_dbscan = dbscan.labels_
 
@@ -261,68 +259,62 @@ euclidean_labels_dbscan = dbscan.labels_
 plt.figure(figsize=(10, 6))
 scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=euclidean_labels_dbscan, cmap='viridis')
 plt.colorbar(scatter)
-plt.title("DBSCAN clustering (Principal Component 1 vs principal Component 2)")
+plt.title("DBSCAN clustering with Euclidean Distance (Principal Component 1 vs principal Component 2)")
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
 plt.show()
 
 ############ 5.2 Manhattan Distance ############
 
-# def manhattan_distance(point1, point2):
-#     distance = 0
-#     for x1, x2 in zip(point1, point2):
-#         distance += abs(x1 - x2)
-#     return distance
+def manhattan_distance(point1, point2):
+    distance = 0
+    for x1, x2 in zip(point1, point2):
+        distance += abs(x1 - x2)
+    return distance
 
-# X = pca_df[['Principal Component 1', 'Principal Component 2']]
-# manhattan_X = cdist (X, X, metric=manhattan_distance)
+X = pca_df[['Principal Component 1', 'Principal Component 2']]
 
-# dbscan = DBSCAN(eps=0.4, min_samples=2, metric='precomputed').fit(manhattan_X)
-# # Labels
-# manhattan_labels_dbscan = dbscan.labels_
+dbscan = DBSCAN(eps=0.4, min_samples=2, metric=manhattan_distance).fit(X)
+# Labels
+manhattan_labels_dbscan = dbscan.labels_
 
-# # Visualize 
-# plt.figure(figsize=(10, 6))
-# scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=manhattan_labels_dbscan, cmap='viridis')
-# plt.colorbar(scatter)
-# plt.title("DBSCAN clustering (Principal Component 1 vs principal Component 2)")
-# plt.xlabel('Principal Component 1')
-# plt.ylabel('Principal Component 2')
-# plt.show()
+# Visualize 
+plt.figure(figsize=(10, 6))
+scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=manhattan_labels_dbscan, cmap='viridis')
+plt.colorbar(scatter)
+plt.title("DBSCAN clustering with Manhattan Distance (Principal Component 1 vs principal Component 2)")
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.show()
 # #############   5.3 Cosine Similiarity #########
 
-# import numpy as np
+def cosine_similarity_distance(point1, point2):
+    vec1 = np.array(point1)
+    vec2 = np.array(point2)
+    dot_product = np.dot(vec1, vec2)
+    magnitude_vec1 = np.linalg.norm(vec1)
+    magnitude_vec2 = np.linalg.norm(vec2)
+    cosine_sim = dot_product / (magnitude_vec1 * magnitude_vec2)
+    return 1- cosine_sim
 
-# def cosine_similarity_distance(point1, point2):
-#     vec1 = np.array(point1)
-#     vec2 = np.array(point2)
-#     dot_product = np.dot(vec1, vec2)
-#     magnitude_vec1 = np.linalg.norm(vec1)
-#     magnitude_vec2 = np.linalg.norm(vec2)
-#     # if magnitude_vec1 == 0 or magnitude_vec2 == 0:
-#     #     # If either vector is zero, cosine similarity is not defined
-#     #     return 0.0
-#     cosine_sim = dot_product / (magnitude_vec1 * magnitude_vec2)
-#     return 1- cosine_sim
+X = pca_df[['Principal Component 1', 'Principal Component 2']]
 
-# X = pca_df[['Principal Component 1', 'Principal Component 2']]
-# cosine_X = cdist (X, X, metric=cosine_similarity_distance)
+dbscan = DBSCAN(eps=0.4, min_samples=2, metric=cosine_similarity_distance).fit(X)
+# Labels
+cosine_labels_dbscan = dbscan.labels_
 
-# dbscan = DBSCAN(eps=0.4, min_samples=2, metric='precomputed').fit(cosine_X)
-# # Labels
-# cosine_labels_dbscan = dbscan.labels_
+# Visualize 
+plt.figure(figsize=(10, 6))
+scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=cosine_labels_dbscan, cmap='viridis')
+plt.colorbar(scatter)
+plt.title("DBSCAN clustering with Cosine Similarity Distance (Principal Component 1 vs principal Component 2)")
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.show()
 
-# # Visualize 
-# plt.figure(figsize=(10, 6))
-# scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=cosine_labels_dbscan, cmap='viridis')
-# plt.colorbar(scatter)
-# plt.title("DBSCAN clustering (Principal Component 1 vs principal Component 2)")
-# plt.xlabel('Principal Component 1')
-# plt.ylabel('Principal Component 2')
-# plt.show()
+########    5.4 Evaluation  ##########
 
-# ########    5.4 Evaluation  ##########
-
-# print(f"Davies-Bouldin Score for DBSCAN with Eucledian Distance: {davies_bouldin_score(euclidean_X, euclidean_labels_dbscan)}")
-# print(f"Davies-Bouldin Score for DBSCAN with Manhattan Distance: {davies_bouldin_score(manhattan_X, manhattan_labels_dbscan)}")
-# print(f"Davies-Bouldin Score for DBSCAN with Cosine Distance: {davies_bouldin_score(cosine_X, cosine_labels_dbscan)}")
+print(f"Davies-Bouldin Score for DBSCAN with Eucledian Distance: {davies_bouldin_score(X, euclidean_labels_dbscan)}")
+print(f"Davies-Bouldin Score for DBSCAN with Manhattan Distance: {davies_bouldin_score(X, manhattan_labels_dbscan)}")
+# print(f"Davies-Bouldin Score for DBSCAN with Cosine Distance: {davies_bouldin_score(X, cosine_labels_dbscan)}")
+# There is only one cluster, therefore we cannot calculate davies_bouldin_score for it
