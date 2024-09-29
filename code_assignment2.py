@@ -7,6 +7,8 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from sklearn.metrics import davies_bouldin_score, calinski_harabasz_score
+from scipy.spatial.distance import cdist
+
 
 
 #normalization function
@@ -88,7 +90,7 @@ comparison_fig.update_layout(
 
 )
 
-# comparison_fig.show()
+comparison_fig.show()
 
 #Apply PCA on our data                                                          #Could take a look at SVD as well
 X = numerical_shoppers_data.drop(columns=['Revenue'])
@@ -107,7 +109,7 @@ plt.bar([f'PC {i}' for i in range(1, 3)],
 plt.title('Explained Variance by Principal Components')
 plt.xlabel('Principal Components')
 plt.ylabel('Explained Variance Ratio')
-# plt.show()
+plt.show()
 
 # c stand for color, since there are only two condition of Severity(y) so set two color to easier visualize
 colors = ['red' if label == 0 else 'purple' for label in y]
@@ -121,7 +123,7 @@ Viewer = mpatches.Patch(color='red', label='Revenue=0 (Viewer)')
 Buyer = mpatches.Patch(color='purple', label='Revenue=1(Buyer)')
 
 plt.legend(handles=[Viewer, Buyer])
-# plt.show()
+plt.show()
 
 
 ####### 3.1 Affinaty Propagation Clustering ######
@@ -158,7 +160,7 @@ plt.colorbar(scatter)
 plt.title("DBSCAN clustering (Principal Component 1 vs principal Component 2)")
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
-# plt.show()
+plt.show()
 
 #######     3.3 Birch Clustering    #########
 
@@ -175,56 +177,54 @@ plt.colorbar(scatter)
 plt.title("BIRCH Clustering (Principal Component 1 vs Principal Componenet 2)")
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
-# plt.show()
-
-print(X.iloc[0])
+plt.show()
 
 ########## 4.1 Silhouette Score ################
 
 def euclidean_distance(point1, point2):
     return np.sqrt(np.sum((point1 - point2) ** 2))
 
-def silhouette_samples(X, labels):
-    n_samples = X.shape[0]
-    unique_labels = np.unique(labels)
+# def silhouette_samples(X, labels):
+#     n_samples = X.shape[0]
+#     unique_labels = np.unique(labels)
     
-    silhouette_scores = np.zeros(n_samples)
+#     silhouette_scores = np.zeros(n_samples)
     
-    for i in range(n_samples):
-        current_label = labels[i]
-        current_point = X[i]
+#     for i in range(n_samples):
+#         print(f"{round(i/(n_samples)*100, 2)}%")
+#         current_label = labels[i]
+#         current_point = X.values[i]
         
-        same_cluster_points = X[labels == current_label]
-        if len(same_cluster_points) > 1:  
-            a = np.mean([euclidean_distance(current_point, other) 
-                        for other in same_cluster_points if not np.array_equal(current_point, other)])
-        else:
-            a = 0
+#         same_cluster_points = X.values[labels == current_label]
+#         if len(same_cluster_points) > 1:  
+#             a = np.mean([euclidean_distance(current_point, other) 
+#                         for other in same_cluster_points if not np.array_equal(current_point, other)])
+#         else:
+#             a = 0
         
-        b = np.inf
-        for other_label in unique_labels:
-            if other_label == current_label:
-                continue
-            other_cluster_points = X[labels == other_label]
-            mean_distance = np.mean([euclidean_distance(current_point, other) for other in other_cluster_points])
-            if mean_distance < b:
-                b = mean_distance
+#         b = np.inf
+#         for other_label in unique_labels:
+#             if other_label == current_label:
+#                 continue
+#             other_cluster_points = X.values[labels == other_label]
+#             mean_distance = np.mean([euclidean_distance(current_point, other) for other in other_cluster_points])
+#             if mean_distance < b:
+#                 b = mean_distance
         
-        silhouette_scores[i] = (b - a) / max(a, b)
+#         silhouette_scores[i] = (b - a) / max(a, b)
     
-    return silhouette_scores
+#     return silhouette_scores
 
-def silhouette_score(X, labels):
-    silhouette_scores = silhouette_samples(X, labels)
-    return np.mean(silhouette_scores)
+# def silhouette_score(X, labels):
+#     silhouette_scores = silhouette_samples(X, labels)
+#     return np.mean(silhouette_scores)
 
-dbscan_score = silhouette_score(X, labels_dbscan)
-print(f"Silhouette Score for DBSCAN: {dbscan_score}")
+# dbscan_score = silhouette_score(X, labels_dbscan)
+# birch_score = silhouette_score(X, labels_birch)
+# print(f"Silhouette Score for DBSCAN: {dbscan_score}")
+# print(f"Silhouette Score for Birch: {birch_score}")
 
-birch_score = silhouette_score(X, labels_birch)
-print(f"Silhouette Score for DBSCAN: {birch_score}")
-
-##########  4.2 Davies Bouldin Score    ##################
+#########  4.2 Davies Bouldin Score    ##################
 def evaluate_davies_bouldin(X, labels_dbscan, labels_birch):
     score_dbscan = davies_bouldin_score(X, labels_dbscan)
     score_birch = davies_bouldin_score(X, labels_birch)
@@ -245,5 +245,84 @@ def evaluate_davies_bouldin(X, labels_dbscan, labels_birch):
     print(f"Davies-Bouldin Score for Birch: {score_birch}")
 
 ## chage the X to the clustring variable
-X = pca[['ExitRates', 'ProductRelated']]
-evaluate_davies_bouldin(X, labels_affinity, labels_dbscan, labels_birch)
+X = pca_df[['Principal Component 1', 'Principal Component 2']]
+evaluate_davies_bouldin(X, labels_dbscan, labels_birch)
+
+########### 5.1 Eucledian Distance  ##############
+
+X = pca_df[['Principal Component 1', 'Principal Component 2']]
+euclidean_X = cdist (X, X, metric=euclidean_distance)
+
+dbscan = DBSCAN(eps=0.4, min_samples=2, metric='precomputed').fit(euclidean_X)
+# Labels
+euclidean_labels_dbscan = dbscan.labels_
+
+# Visualize 
+plt.figure(figsize=(10, 6))
+scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=euclidean_labels_dbscan, cmap='viridis')
+plt.colorbar(scatter)
+plt.title("DBSCAN clustering (Principal Component 1 vs principal Component 2)")
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.show()
+
+############ 5.2 Manhattan Distance ############
+
+# def manhattan_distance(point1, point2):
+#     distance = 0
+#     for x1, x2 in zip(point1, point2):
+#         distance += abs(x1 - x2)
+#     return distance
+
+# X = pca_df[['Principal Component 1', 'Principal Component 2']]
+# manhattan_X = cdist (X, X, metric=manhattan_distance)
+
+# dbscan = DBSCAN(eps=0.4, min_samples=2, metric='precomputed').fit(manhattan_X)
+# # Labels
+# manhattan_labels_dbscan = dbscan.labels_
+
+# # Visualize 
+# plt.figure(figsize=(10, 6))
+# scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=manhattan_labels_dbscan, cmap='viridis')
+# plt.colorbar(scatter)
+# plt.title("DBSCAN clustering (Principal Component 1 vs principal Component 2)")
+# plt.xlabel('Principal Component 1')
+# plt.ylabel('Principal Component 2')
+# plt.show()
+# #############   5.3 Cosine Similiarity #########
+
+# import numpy as np
+
+# def cosine_similarity_distance(point1, point2):
+#     vec1 = np.array(point1)
+#     vec2 = np.array(point2)
+#     dot_product = np.dot(vec1, vec2)
+#     magnitude_vec1 = np.linalg.norm(vec1)
+#     magnitude_vec2 = np.linalg.norm(vec2)
+#     # if magnitude_vec1 == 0 or magnitude_vec2 == 0:
+#     #     # If either vector is zero, cosine similarity is not defined
+#     #     return 0.0
+#     cosine_sim = dot_product / (magnitude_vec1 * magnitude_vec2)
+#     return 1- cosine_sim
+
+# X = pca_df[['Principal Component 1', 'Principal Component 2']]
+# cosine_X = cdist (X, X, metric=cosine_similarity_distance)
+
+# dbscan = DBSCAN(eps=0.4, min_samples=2, metric='precomputed').fit(cosine_X)
+# # Labels
+# cosine_labels_dbscan = dbscan.labels_
+
+# # Visualize 
+# plt.figure(figsize=(10, 6))
+# scatter = plt.scatter(X['Principal Component 1'], X['Principal Component 2'], c=cosine_labels_dbscan, cmap='viridis')
+# plt.colorbar(scatter)
+# plt.title("DBSCAN clustering (Principal Component 1 vs principal Component 2)")
+# plt.xlabel('Principal Component 1')
+# plt.ylabel('Principal Component 2')
+# plt.show()
+
+# ########    5.4 Evaluation  ##########
+
+# print(f"Davies-Bouldin Score for DBSCAN with Eucledian Distance: {davies_bouldin_score(euclidean_X, euclidean_labels_dbscan)}")
+# print(f"Davies-Bouldin Score for DBSCAN with Manhattan Distance: {davies_bouldin_score(manhattan_X, manhattan_labels_dbscan)}")
+# print(f"Davies-Bouldin Score for DBSCAN with Cosine Distance: {davies_bouldin_score(cosine_X, cosine_labels_dbscan)}")
