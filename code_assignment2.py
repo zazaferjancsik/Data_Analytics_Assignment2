@@ -150,7 +150,7 @@ plt.show()
 #######     3.2 DBSCAN Clustering   ########
 
 X = pca_df[['Principal Component 1', 'Principal Component 2']]
-dbscan = DBSCAN(eps=0.1, min_samples=2).fit(X)
+dbscan = DBSCAN(eps=0.4, min_samples=2).fit(X)
 # Labels
 labels_dbscan = dbscan.labels_
 
@@ -164,7 +164,7 @@ plt.show()
 
 #######     3.3 Birch Clustering    #########
 
-birch = Birch(n_clusters=2, threshold=0.05)
+birch = Birch(n_clusters=3, threshold=0.5)
 birch.fit(X)
 
 # Get cluster labels
@@ -181,88 +181,45 @@ plt.show()
 
 ########## 4.1 Silhouette Score ################
 
-def euclidean_distance(point1, point2):
-    return np.sqrt(np.sum((point1 - point2) ** 2))
-
-# def silhouette_samples(X, labels):
-#     n_samples = X.shape[0]
-#     unique_labels = np.unique(labels)
+# def silhouette_score(points, labels):
+#     n = len(points)
+#     unique_clusters = set(labels)
     
-#     silhouette_scores = np.zeros(n_samples)
+#     silhouette_scores = []
     
-#     for i in range(n_samples):
-#         print(f"{round(i/(n_samples)*100, 2)}%")
-#         current_label = labels[i]
-#         current_point = X.values[i]
+#     for i in range(n):
+#         current_point = points[i]
+#         current_cluster = labels[i]
         
-#         same_cluster_points = X.values[labels == current_label]
-#         if len(same_cluster_points) > 1:  
-#             a = np.mean([euclidean_distance(current_point, other) 
-#                         for other in same_cluster_points if not np.array_equal(current_point, other)])
+#         # Intra-cluster distance: average distance to all other points in the same cluster
+#         same_cluster_points = [points[j] for j in range(n) if labels[j] == current_cluster and j != i]
+#         if same_cluster_points:
+#             a_i = sum(euclidean_distance(current_point, p) for p in same_cluster_points) / len(same_cluster_points)
 #         else:
-#             a = 0
+#             a_i = 0  # When there's no other point in the same cluster
         
-#         b = np.inf
-#         for other_label in unique_labels:
-#             if other_label == current_label:
+#         # Inter-cluster distance: minimum average distance to points in any other cluster
+#         b_i = float('inf')
+#         for other_cluster in unique_clusters:
+#             if other_cluster == current_cluster:
 #                 continue
-#             other_cluster_points = X.values[labels == other_label]
-#             mean_distance = np.mean([euclidean_distance(current_point, other) for other in other_cluster_points])
-#             if mean_distance < b:
-#                 b = mean_distance
+#             other_cluster_points = [points[j] for j in range(n) if labels[j] == other_cluster]
+#             if other_cluster_points:
+#                 avg_distance = sum(euclidean_distance(current_point, p) for p in other_cluster_points) / len(other_cluster_points)
+#                 b_i = min(b_i, avg_distance)
         
-#         silhouette_scores[i] = (b - a) / max(a, b)
+#         # Calculate silhouette score for point i
+#         if a_i == 0 and b_i == 0:
+#             silhouette = 0
+#         else:
+#             silhouette = (b_i - a_i) / max(a_i, b_i)
+#         silhouette_scores.append(silhouette)
     
-#     return silhouette_scores
+#     # Average silhouette score for all points
+#     overall_silhouette_score = sum(silhouette_scores) / n
+#     return overall_silhouette_score
 
-# def silhouette_score(X, labels):
-#     silhouette_scores = silhouette_samples(X, labels)
-#     return np.mean(silhouette_scores)
-
-# dbscan_score = silhouette_score(X, labels_dbscan)
-# birch_score = silhouette_score(X, labels_birch)
-# print(f"Silhouette Score for DBSCAN: {dbscan_score}")
-# print(f"Silhouette Score for Birch: {birch_score}")
-
-def silhouette_score(points, labels):
-    n = len(points)
-    unique_clusters = set(labels)
-    
-    silhouette_scores = []
-    
-    for i in range(n):
-        current_point = points[i]
-        current_cluster = labels[i]
-        
-        # Intra-cluster distance: average distance to all other points in the same cluster
-        same_cluster_points = [points[j] for j in range(n) if labels[j] == current_cluster and j != i]
-        if same_cluster_points:
-            a_i = sum(euclidean_distance(current_point, p) for p in same_cluster_points) / len(same_cluster_points)
-        else:
-            a_i = 0  # When there's no other point in the same cluster
-        
-        # Inter-cluster distance: minimum average distance to points in any other cluster
-        b_i = float('inf')
-        for other_cluster in unique_clusters:
-            if other_cluster == current_cluster:
-                continue
-            other_cluster_points = [points[j] for j in range(n) if labels[j] == other_cluster]
-            if other_cluster_points:
-                avg_distance = sum(euclidean_distance(current_point, p) for p in other_cluster_points) / len(other_cluster_points)
-                b_i = min(b_i, avg_distance)
-        
-        # Calculate silhouette score for point i
-        if a_i == 0 and b_i == 0:
-            silhouette = 0
-        else:
-            silhouette = (b_i - a_i) / max(a_i, b_i)
-        silhouette_scores.append(silhouette)
-    
-    # Average silhouette score for all points
-    overall_silhouette_score = sum(silhouette_scores) / n
-    return overall_silhouette_score
-
-print(f"Silhouette Score for DBSCAN: {silhouette_score(X.values, labels_dbscan)}")
+# print(f"Silhouette Score for DBSCAN: {silhouette_score(X.values, labels_dbscan)}")
 
 #########  4.2 Davies Bouldin Score    ##################
 def evaluate_davies_bouldin(X, labels_dbscan, labels_birch):
@@ -271,7 +228,7 @@ def evaluate_davies_bouldin(X, labels_dbscan, labels_birch):
 
     print(f"Davies-Bouldin Score for DBSCAN: {score_dbscan}")
     print(f"Davies-Bouldin Score for Birch: {score_birch}")
-    return score_dbscan, score_birch
+    return [score_dbscan, score_birch]
 
 X = pca_df[['Principal Component 1', 'Principal Component 2']]
 evaluate_davies_bouldin(X, labels_dbscan, labels_birch)
@@ -285,35 +242,69 @@ def evaluate_calinski_harabasz(X, labels_dbscan, labels_birch):
 
     print(f"Calinski-Harabasz Score for DBSCAN: {score_dbscan}")
     print(f"Calinski-Harabasz Score for Birch: {score_birch}")
-    return score_dbscan, score_birch
+    return [score_dbscan, score_birch]
 
 ## change the X to the clustering variable
 X = pca_df[['Principal Component 1', 'Principal Component 2']]
 evaluate_calinski_harabasz(X, labels_dbscan, labels_birch)
 
 ########       Comparison Chart For Evaluation  ########
-metrics = ['Silhouette Score', 'Davies-Bouldin Score', 'Calinski-Harabasz Index']
+
+silhouette_metrics = ['Silhouette Score']
+db_metrics = ['Davies-Bouldin Score']
+ch_metrics = ['Calinski Harabasz Index']
 scores = [
     [silhouette_score(X.values, labels_dbscan), silhouette_score(X.values, labels_birch)],
-    [evaluate_davies_bouldin(X, labels_dbscan, labels_birch)],
-    [evaluate_calinski_harabasz(X, labels_dbscan, labels_birch)]
+    [(evaluate_davies_bouldin(X, labels_dbscan, labels_birch))],
+    [(evaluate_calinski_harabasz(X, labels_dbscan, labels_birch))]
 ]
 
-fig = go.Figure(data=[
-    go.Bar(name='DBSCAN', x=metrics, y=[score[0] for score in scores]),
-    go.Bar(name='BIRCH', x=metrics, y=[score[1] for score in scores])
+evaluation_fig_silhouette = go.Figure(data=[
+    go.Bar(name='DBSCAN', x=silhouette_metrics, y=[scores[0][0]]),
+    go.Bar(name='BIRCH', x=silhouette_metrics, y=[scores[0][1]])
 ])
 
-fig.update_layout(
+evaluation_fig_silhouette.update_layout(
     title='Comparison of Clustering Performance Metrics',
     xaxis_title='Clustering Metrics',
     yaxis_title='Score',
     barmode='group' 
 )
 
-fig.show()
+evaluation_fig_silhouette.show()
+
+evaluation_fig_db = go.Figure(data=[
+    go.Bar(name='DBSCAN', x=db_metrics, y=[scores[1][0][0]]),
+    go.Bar(name='BIRCH', x=db_metrics, y=[scores[1][0][1]])
+])
+
+evaluation_fig_db.update_layout(
+    title='Comparison of Clustering Performance Metrics',
+    xaxis_title='Clustering Metrics',
+    yaxis_title='Score',
+    barmode='group'
+)
+
+evaluation_fig_db.show()
+
+evaluation_fig_ch = go.Figure(data=[
+    go.Bar(name='DBSCAN', x=ch_metrics, y=[scores[2][0][0]]),
+    go.Bar(name='BIRCH', x=ch_metrics, y=[scores[2][0][1]])
+])
+
+evaluation_fig_ch.update_layout(
+    title='Comparison of Clustering Performance Metrics',
+    xaxis_title='Clustering Metrics',
+    yaxis_title='Score',
+    barmode='group' 
+)
+
+evaluation_fig_ch.show()
 
 ########### 5.1 Eucledian Distance  ##############
+
+def euclidean_distance(point1, point2):
+    return np.sqrt(np.sum((point1 - point2) ** 2))
 
 X = pca_df[['Principal Component 1', 'Principal Component 2']]
 # euclidean_X = cdist (X, X, metric=euclidean_distance)
